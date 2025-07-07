@@ -3,49 +3,62 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>料理分量計算ツール</title>
+  <title>レシピ分量計算ツール | cleverkitjp</title>
+  <meta name="description" content="料理の分量を人数に合わせて自動計算！大さじ・個・mlなどに対応。材料行の追加・削除も可能です。">
+  <meta property="og:title" content="レシピ分量計算ツール" />
+  <meta property="og:description" content="人数に合わせて材料の分量を自動で計算。スマホ対応・材料行の追加削除OK！" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://cleverkitjp.github.io/recipe-scaler/" />
+  <meta property="og:image" content="https://cleverkitjp.github.io/recipe-scaler/ogp.png" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>料理分量計算ツール</h1>
-  <p>元の人数と希望人数を入力し、材料の分量を自動換算します。</p>
+  <h1>レシピ分量計算ツール</h1>
+  <p>人数に合わせて、調味料や食材の分量を自動換算できます。</p>
 
   <div class="inputs">
     <label>元の人数: <input type="number" id="original" value="4" min="1" /></label>
     <label>希望人数: <input type="number" id="target" value="6" min="1" /></label>
     <button onclick="convert()">計算する</button>
+    <button onclick="addRow()">行を追加</button>
   </div>
 
-  <table id="ingredients">
-    <thead>
-      <tr>
-        <th>食材名</th>
-        <th>分量</th>
-        <th>単位</th>
-        <th>換算後</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><input value="醤油" /></td>
-        <td><input value="2" type="number" /></td>
-        <td><input value="大さじ" /></td>
-        <td class="result">-</td>
-      </tr>
-      <tr>
-        <td><input value="砂糖" /></td>
-        <td><input value="1" type="number" /></td>
-        <td><input value="小さじ" /></td>
-        <td class="result">-</td>
-      </tr>
-      <tr>
-        <td><input value="卵" /></td>
-        <td><input value="2" type="number" /></td>
-        <td><input value="個" /></td>
-        <td class="result">-</td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="table-wrapper">
+    <table id="ingredients">
+      <thead>
+        <tr>
+          <th>食材名</th>
+          <th>分量</th>
+          <th>単位</th>
+          <th>換算後</th>
+          <th>削除</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input value="醤油" /></td>
+          <td><input value="2" type="number" /></td>
+          <td><input value="大さじ" /></td>
+          <td class="result">-</td>
+          <td><button onclick="deleteRow(this)">×</button></td>
+        </tr>
+        <tr>
+          <td><input value="砂糖" /></td>
+          <td><input value="1" type="number" /></td>
+          <td><input value="小さじ" /></td>
+          <td class="result">-</td>
+          <td><button onclick="deleteRow(this)">×</button></td>
+        </tr>
+        <tr>
+          <td><input value="卵" /></td>
+          <td><input value="2" type="number" /></td>
+          <td><input value="個" /></td>
+          <td class="result">-</td>
+          <td><button onclick="deleteRow(this)">×</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <script src="script.js"></script>
 </body>

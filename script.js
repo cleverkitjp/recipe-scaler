@@ -7,9 +7,11 @@ function convert() {
 
   rows.forEach((row) => {
     const quantityCell = row.cells[1].querySelector("input");
+    const unitCell = row.cells[2].querySelector("input");
     const resultCell = row.cells[3];
 
     const base = parseFloat(quantityCell.value);
+    const unit = unitCell.value;
     if (isNaN(base)) {
       resultCell.textContent = "エラー";
       return;
@@ -17,8 +19,7 @@ function convert() {
 
     const result = base * ratio;
 
-    // 卵など1.3個の処理（簡易）
-    if (row.cells[2].querySelector("input").value === "個") {
+    if (unit === "個") {
       if (result % 1 < 0.25) {
         resultCell.textContent = Math.floor(result) + "個";
       } else if (result % 1 > 0.75) {
@@ -27,7 +28,25 @@ function convert() {
         resultCell.textContent = Math.floor(result) + "個＋少々";
       }
     } else {
-      resultCell.textContent = Math.round(result * 10) / 10;
+      resultCell.textContent = Math.round(result * 10) / 10 + unit;
     }
   });
+}
+
+function addRow() {
+  const table = document.querySelector("#ingredients tbody");
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td><input value="" /></td>
+    <td><input type="number" value="" /></td>
+    <td><input value="" /></td>
+    <td class="result">-</td>
+    <td><button onclick="deleteRow(this)">×</button></td>
+  `;
+  table.appendChild(row);
+}
+
+function deleteRow(button) {
+  const row = button.closest("tr");
+  row.remove();
 }

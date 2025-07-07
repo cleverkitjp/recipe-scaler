@@ -14,16 +14,23 @@ h1 {
 
 .inputs {
   margin: 15px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
-.inputs label {
-  margin-right: 10px;
+label {
+  white-space: nowrap;
+}
+
+.table-wrapper {
+  overflow-x: auto;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
+  min-width: 600px;
 }
 
 table th, table td {
@@ -34,4 +41,9 @@ table th, table td {
 
 input[type="number"] {
   width: 60px;
+}
+
+button {
+  padding: 4px 8px;
+  cursor: pointer;
 }
