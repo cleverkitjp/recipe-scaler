@@ -23,42 +23,40 @@
     <button onclick="addRow()">行を追加</button>
   </div>
 
-  <div class="table-wrapper">
-    <table id="ingredients">
-      <thead>
-        <tr>
-          <th>食材名</th>
-          <th>分量</th>
-          <th>単位</th>
-          <th>換算後</th>
-          <th>削除</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><input value="醤油" /></td>
-          <td><input value="2" type="number" /></td>
-          <td><input value="大さじ" /></td>
-          <td class="result">-</td>
-          <td><button onclick="deleteRow(this)">×</button></td>
-        </tr>
-        <tr>
-          <td><input value="砂糖" /></td>
-          <td><input value="1" type="number" /></td>
-          <td><input value="小さじ" /></td>
-          <td class="result">-</td>
-          <td><button onclick="deleteRow(this)">×</button></td>
-        </tr>
-        <tr>
-          <td><input value="卵" /></td>
-          <td><input value="2" type="number" /></td>
-          <td><input value="個" /></td>
-          <td class="result">-</td>
-          <td><button onclick="deleteRow(this)">×</button></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <table id="ingredients">
+    <thead>
+      <tr>
+        <th>食材名</th>
+        <th>分量</th>
+        <th>単位</th>
+        <th>換算後</th>
+        <th>削除</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td data-label="食材名"><input value="醤油" /></td>
+        <td data-label="分量"><input value="2" type="number" /></td>
+        <td data-label="単位"><input value="大さじ" /></td>
+        <td class="result" data-label="換算後">-</td>
+        <td data-label="削除"><button onclick="deleteRow(this)">×</button></td>
+      </tr>
+      <tr>
+        <td data-label="食材名"><input value="砂糖" /></td>
+        <td data-label="分量"><input value="1" type="number" /></td>
+        <td data-label="単位"><input value="小さじ" /></td>
+        <td class="result" data-label="換算後">-</td>
+        <td data-label="削除"><button onclick="deleteRow(this)">×</button></td>
+      </tr>
+      <tr>
+        <td data-label="食材名"><input value="卵" /></td>
+        <td data-label="分量"><input value="2" type="number" /></td>
+        <td data-label="単位"><input value="個" /></td>
+        <td class="result" data-label="換算後">-</td>
+        <td data-label="削除"><button onclick="deleteRow(this)">×</button></td>
+      </tr>
+    </tbody>
+  </table>
 
   <script src="script.js"></script>
 </body>

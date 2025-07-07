@@ -37,11 +37,11 @@ function addRow() {
   const table = document.querySelector("#ingredients tbody");
   const row = document.createElement("tr");
   row.innerHTML = `
-    <td><input value="" /></td>
-    <td><input type="number" value="" /></td>
-    <td><input value="" /></td>
-    <td class="result">-</td>
-    <td><button onclick="deleteRow(this)">×</button></td>
+    <td data-label="食材名"><input value="" /></td>
+    <td data-label="分量"><input type="number" value="" /></td>
+    <td data-label="単位"><input value="" /></td>
+    <td class="result" data-label="換算後">-</td>
+    <td data-label="削除"><button onclick="deleteRow(this)">×</button></td>
   `;
   table.appendChild(row);
 }
