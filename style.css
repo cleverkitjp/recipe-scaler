@@ -1,330 +1,343 @@
-// 単位→ml の変換（体積系のみ）
-const UNIT_TO_ML = {
-  "小さじ": 5,
-  "大さじ": 15,
-  "カップ": 200,
-  "ml": 1
-};
-
-const VOLUME_UNITS = ["小さじ", "大さじ", "カップ", "ml"];
-
-document.addEventListener("DOMContentLoaded", () => {
-  const container = document.getElementById("ingredientsContainer");
-  const addBtn = document.getElementById("addIngredientBtn");
-  const calcBtn = document.getElementById("calcBtn");
-  const copyBtn = document.getElementById("copyBtn");
-  const resultCard = document.getElementById("resultCard");
-
-  // 初期カードを3つ追加
-  addIngredientCard(container, { name: "醤油", amount: 2, unit: "大さじ" });
-  addIngredientCard(container, { name: "砂糖", amount: 1, unit: "小さじ" });
-  addIngredientCard(container, { name: "卵", amount: 2, unit: "個" });
-
-  addBtn.addEventListener("click", () => {
-    addIngredientCard(container);
-  });
-
-  calcBtn.addEventListener("click", () => {
-    calculateAndRender();
-    resultCard.style.display = "block";
-    resultCard.scrollIntoView({ behavior: "smooth", block: "start" });
-  });
-
-  copyBtn.addEventListener("click", () => {
-    copyResultsToClipboard();
-  });
-});
-
-/**
- * 材料カードを追加
- */
-function addIngredientCard(container, defaults = {}) {
-  const card = document.createElement("div");
-  card.className = "ingredient-card";
-
-  card.innerHTML = `
-    <div class="ingredient-card-header">
-      <div class="ingredient-card-header-title">材料</div>
-      <button type="button" class="btn-danger" onclick="deleteIngredientCard(this)">削除</button>
-    </div>
-    <div class="field">
-      <label>食材名</label>
-      <input type="text" class="ing-name" placeholder="例：醤油" value="${defaults.name ?? ""}">
-    </div>
-    <div class="ingredient-row">
-      <div class="field field-amount">
-        <label>分量</label>
-        <input type="number" class="ing-amount" step="0.1" min="0" value="${defaults.amount ?? ""}">
-      </div>
-      <div class="field field-unit">
-        <label>単位</label>
-        <select class="ing-unit">
-          ${renderUnitOptions(defaults.unit)}
-        </select>
-      </div>
-    </div>
-  `;
-
-  container.appendChild(card);
+:root {
+  --bg: #fff7ed;
+  --card-bg: #ffffff;
+  --accent: #f97316;
+  --accent-dark: #ea580c;
+  --accent-soft: #fed7aa;
+  --text-main: #333333;
+  --text-muted: #666666;
+  --border: #e5e5e5;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
-function renderUnitOptions(selected) {
-  const units = ["小さじ", "大さじ", "カップ", "ml", "個"];
-  return units
-    .map(
-      (u) =>
-        `<option value="${u}" ${u === selected ? "selected" : ""}>${u}</option>`
-    )
-    .join("");
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-/**
- * 材料カードを削除
- */
-function deleteIngredientCard(button) {
-  const container = document.getElementById("ingredientsContainer");
-  const cards = container.querySelectorAll(".ingredient-card");
-  if (cards.length <= 1) {
-    showToast("材料は少なくとも1つ必要です");
-    return;
-  }
-  const card = button.closest(".ingredient-card");
-  card.remove();
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text-main);
 }
 
-/**
- * 計算＆結果テーブル描画
- */
-function calculateAndRender() {
-  const originalServings = parseFloat(
-    document.getElementById("originalServings").value
-  );
-  const targetServings = parseFloat(
-    document.getElementById("targetServings").value
-  );
-  const recipeName = document.getElementById("recipeName").value.trim();
-
-  if (!originalServings || !targetServings || originalServings <= 0) {
-    showToast("人数を正しく入力してください");
-    return;
-  }
-
-  const ratio = targetServings / originalServings;
-
-  const container = document.getElementById("ingredientsContainer");
-  const cards = container.querySelectorAll(".ingredient-card");
-
-  const rows = [];
-
-  cards.forEach((card) => {
-    const nameInput = card.querySelector(".ing-name");
-    const amountInput = card.querySelector(".ing-amount");
-    const unitSelect = card.querySelector(".ing-unit");
-
-    const name = (nameInput.value || "").trim();
-    const amount = parseFloat(amountInput.value);
-    const unit = unitSelect.value;
-
-    if (!name && !amount) {
-      return; // 両方空は無視
-    }
-    if (!amount || amount <= 0) {
-      return; // 0や未入力はスキップ
-    }
-
-    const scaled = amount * ratio;
-
-    let naturalText = "";
-    let mlText = "-";
-
-    if (unit === "個") {
-      naturalText = formatPieces(scaled, name);
-    } else if (VOLUME_UNITS.includes(unit)) {
-      const baseMl = UNIT_TO_ML[unit] * scaled;
-      naturalText = formatVolumeNice(baseMl);
-      mlText = round1(baseMl) + "ml";
-    } else {
-      // 未対応単位
-      naturalText = round1(scaled) + unit;
-    }
-
-    rows.push({ name, naturalText, mlText });
-  });
-
-  renderResult(recipeName, targetServings, rows);
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px;
 }
 
-/**
- * 個数の自然な表現
- */
-function formatPieces(value, name) {
-  const intPart = Math.floor(value);
-  const frac = value - intPart;
+/* Header */
 
-  if (value < 1 && frac > 0) {
-    return `${name} 少々`;
-  }
-
-  if (frac < 0.25) {
-    return `${intPart}個`;
-  } else if (frac > 0.75) {
-    return `${intPart + 1}個`;
-  } else {
-    return `${intPart}個＋少々`;
-  }
+.page-header {
+  margin-bottom: 16px;
 }
 
-/**
- * mlを「大さじ＋小さじ」などに分解
- */
-function formatVolumeNice(totalMl) {
-  if (!totalMl || totalMl <= 0) return "-";
-
-  let ml = totalMl;
-
-  const tbsp = Math.floor(ml / 15);
-  ml -= tbsp * 15;
-
-  let tsp = ml / 5;
-  // 小さじは0.5刻みに丸める
-  tsp = Math.round(tsp * 2) / 2;
-
-  const parts = [];
-  if (tbsp > 0) {
-    parts.push(`大さじ${tbsp}`);
-  }
-  if (tsp > 0) {
-    parts.push(`小さじ${tsp}`);
-  }
-
-  if (parts.length === 0) {
-    return `${round1(totalMl)}ml`;
-  }
-  return parts.join("＋");
+.page-header h1 {
+  margin: 0 0 4px;
+  font-size: 1.4rem;
+  color: var(--accent-dark);
 }
 
-/**
- * 結果テーブルをDOMに描画
- */
-function renderResult(recipeName, targetServings, rows) {
-  const titleEl = document.getElementById("resultRecipeTitle");
-  const servingsEl = document.getElementById("resultServings");
-  const tbody = document
-    .getElementById("resultTable")
-    .querySelector("tbody");
-
-  titleEl.textContent = recipeName || "レシピ名未入力";
-  servingsEl.textContent = targetServings
-    ? `${targetServings}人分`
-    : "";
-
-  tbody.innerHTML = "";
-
-  if (rows.length === 0) {
-    const tr = document.createElement("tr");
-    const td = document.createElement("td");
-    td.colSpan = 3;
-    td.textContent = "有効な材料が入力されていません。";
-    tbody.appendChild(tr);
-    tr.appendChild(td);
-    return;
-  }
-
-  rows.forEach((r) => {
-    const tr = document.createElement("tr");
-    const tdName = document.createElement("td");
-    const tdNatural = document.createElement("td");
-    const tdMl = document.createElement("td");
-
-    tdName.textContent = r.name;
-    tdNatural.textContent = r.naturalText;
-    tdMl.textContent = r.mlText;
-
-    tr.appendChild(tdName);
-    tr.appendChild(tdNatural);
-    tr.appendChild(tdMl);
-    tbody.appendChild(tr);
-  });
+.page-header p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
 }
 
-/**
- * 結果をテキストにしてクリップボードへコピー
- */
-function copyResultsToClipboard() {
-  const recipeName = document.getElementById("resultRecipeTitle").textContent;
-  const servingsText = document.getElementById("resultServings").textContent;
+/* Card */
 
-  const rows = document.querySelectorAll("#resultTable tbody tr");
-  if (!rows.length) {
-    showToast("コピーする結果がありません");
-    return;
-  }
-
-  const lines = [];
-  lines.push(`【${recipeName}】${servingsText}`);
-  lines.push("");
-
-  rows.forEach((tr) => {
-    const tds = tr.querySelectorAll("td");
-    if (tds.length !== 3) return;
-    const name = tds[0].textContent.trim();
-    const nat = tds[1].textContent.trim();
-    const ml = tds[2].textContent.trim();
-    if (!name) return;
-
-    if (ml && ml !== "-") {
-      lines.push(`${name}：${nat}（${ml}）`);
-    } else {
-      lines.push(`${name}：${nat}`);
-    }
-  });
-
-  const text = lines.join("\n");
-
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        showToast("コピーしました");
-      })
-      .catch(() => {
-        legacyCopy(text);
-      });
-  } else {
-    legacyCopy(text);
-  }
+.card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+  padding: 12px 14px 14px;
 }
 
-function legacyCopy(text) {
-  const area = document.createElement("textarea");
-  area.value = text;
-  document.body.appendChild(area);
-  area.select();
-  try {
-    document.execCommand("copy");
-    showToast("コピーしました");
-  } catch (e) {
-    showToast("コピーに失敗しました");
+.card-title {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  color: var(--text-main);
+  border-left: 4px solid var(--accent);
+  padding-left: 8px;
+}
+
+.card-body {
+  font-size: 0.9rem;
+}
+
+/* Fields */
+
+.field {
+  margin-bottom: 10px;
+}
+
+.field label {
+  display: block;
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+  color: var(--text-muted);
+}
+
+.field input,
+.field select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-size: 0.95rem;
+}
+
+.field input:focus,
+.field select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.25);
+}
+
+/* Inline fields */
+
+.inline-fields {
+  display: flex;
+  gap: 10px;
+}
+
+.inline-fields > div {
+  flex: 1;
+}
+
+.with-unit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.with-unit input {
+  flex: 1;
+}
+
+.unit-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Ingredients cards */
+
+.ingredients-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ingredient-card {
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  background: #fffbf7;
+}
+
+.ingredient-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.ingredient-card-header-title {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.ingredient-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.ingredient-row .field {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.ingredient-row .field-amount {
+  max-width: 120px;
+}
+
+.ingredient-row .field-unit {
+  max-width: 130px;
+}
+
+/* Buttons */
+
+button {
+  font-family: inherit;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-outline {
+  border-radius: 999px;
+  border: none;
+  padding: 9px 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background: var(--accent-dark);
+}
+
+.btn-secondary {
+  background: #fff;
+  color: var(--accent-dark);
+  border: 1px solid var(--accent-soft);
+}
+
+.btn-secondary:hover {
+  background: #fff7ed;
+}
+
+.btn-outline {
+  background: #ffffff;
+  color: var(--accent-dark);
+  border: 1px solid var(--accent-soft);
+}
+
+.btn-outline:hover {
+  background: #fff7ed;
+}
+
+.btn-danger {
+  background: transparent;
+  color: #b91c1c;
+  border: none;
+  font-size: 0.8rem;
+  padding: 4px 6px;
+}
+
+.btn-danger:hover {
+  text-decoration: underline;
+}
+
+.full {
+  width: 100%;
+}
+
+/* Actions */
+
+.actions {
+  padding-top: 4px;
+}
+
+/* Result */
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.result-title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-main);
+}
+
+.result-servings {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.result-table-wrapper {
+  overflow-x: auto;
+  margin-bottom: 10px;
+}
+
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.result-table th,
+.result-table td {
+  border: 1px solid var(--border);
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.result-table th {
+  background: #fff2e1;
+  font-weight: 600;
+}
+
+.result-table td:nth-child(1) {
+  width: 30%;
+}
+
+/* Toast */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  background: rgba(55, 65, 81, 0.95);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 999;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+/* Responsive */
+
+@media (max-width: 600px) {
+  .page {
+    padding: 12px;
   }
-  document.body.removeChild(area);
-}
 
-/**
- * 小数1桁に丸め
- */
-function round1(value) {
-  return Math.round(value * 10) / 10;
-}
+  .page-header h1 {
+    font-size: 1.3rem;
+  }
 
-/**
- * トースト表示
- */
-function showToast(message) {
-  const toast = document.getElementById("toast");
-  toast.textContent = message;
-  toast.classList.add("show");
-  clearTimeout(toast._timer);
-  toast._timer = setTimeout(() => {
-    toast.classList.remove("show");
-  }, 1800);
-    }
+  .inline-fields {
+    flex-direction: column;
+  }
+
+  .ingredient-row {
+    flex-direction: column;
+  }
+
+  .ingredient-row .field-amount,
+  .ingredient-row .field-unit {
+    max-width: 100%;
+  }
+
+  .result-table th,
+  .result-table td {
+    font-size: 0.8rem;
+  }
+}
