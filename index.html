@@ -3,60 +3,97 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>レシピ分量計算ツール | cleverkitjp</title>
-  <meta name="description" content="料理の分量を人数に合わせて自動計算！大さじ・個・mlなどに対応。材料行の追加・削除も可能です。">
-  <meta property="og:title" content="レシピ分量計算ツール" />
-  <meta property="og:description" content="人数に合わせて材料の分量を自動で計算。スマホ対応・材料行の追加削除OK！" />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://cleverkitjp.github.io/recipe-scaler/" />
-  <meta property="og:image" content="https://cleverkitjp.github.io/recipe-scaler/ogp.png" />
+  <title>レシピ分量計算ツール｜人数に合わせて自動換算</title>
+  <meta name="description" content="レシピの材料を、元の人数から希望人数に合わせて自動換算できるツールです。小さじ・大さじ・カップ・mlを相互変換し、ml併記で分かりやすく表示します。スマホ最適化。">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>レシピ分量計算ツール</h1>
-  <p>人数に合わせて、調味料や食材の分量を自動換算できます。</p>
+  <main class="page">
+    <header class="page-header">
+      <h1>レシピ分量計算ツール</h1>
+      <p>元レシピの人数と希望人数を入れると、材料の分量を自動換算します。</p>
+    </header>
 
-  <div class="inputs">
-    <label>元の人数: <input type="number" id="original" value="4" min="1" /></label>
-    <label>希望人数: <input type="number" id="target" value="6" min="1" /></label>
-    <button onclick="convert()">計算する</button>
-    <button onclick="addRow()">行を追加</button>
-  </div>
+    <!-- レシピ情報カード -->
+    <section class="card">
+      <h2 class="card-title">レシピ情報</h2>
+      <div class="card-body recipe-info">
+        <div class="field">
+          <label for="recipeName">レシピ名</label>
+          <input id="recipeName" type="text" placeholder="例：豚の角煮" />
+        </div>
+        <div class="field inline-fields">
+          <div>
+            <label for="originalServings">元の人数</label>
+            <div class="with-unit">
+              <input id="originalServings" type="number" min="1" value="4" />
+              <span class="unit-label">人分</span>
+            </div>
+          </div>
+          <div>
+            <label for="targetServings">希望人数</label>
+            <div class="with-unit">
+              <input id="targetServings" type="number" min="1" value="6" />
+              <span class="unit-label">人分</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-  <table id="ingredients">
-    <thead>
-      <tr>
-        <th>食材名</th>
-        <th>分量</th>
-        <th>単位</th>
-        <th>換算後</th>
-        <th>削除</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td data-label="食材名"><input value="醤油" /></td>
-        <td data-label="分量"><input value="2" type="number" /></td>
-        <td data-label="単位"><input value="大さじ" /></td>
-        <td class="result" data-label="換算後">-</td>
-        <td data-label="削除"><button onclick="deleteRow(this)">×</button></td>
-      </tr>
-      <tr>
-        <td data-label="食材名"><input value="砂糖" /></td>
-        <td data-label="分量"><input value="1" type="number" /></td>
-        <td data-label="単位"><input value="小さじ" /></td>
-        <td class="result" data-label="換算後">-</td>
-        <td data-label="削除"><button onclick="deleteRow(this)">×</button></td>
-      </tr>
-      <tr>
-        <td data-label="食材名"><input value="卵" /></td>
-        <td data-label="分量"><input value="2" type="number" /></td>
-        <td data-label="単位"><input value="個" /></td>
-        <td class="result" data-label="換算後">-</td>
-        <td data-label="削除"><button onclick="deleteRow(this)">×</button></td>
-      </tr>
-    </tbody>
-  </table>
+    <!-- 材料入力カード -->
+    <section class="card">
+      <h2 class="card-title">材料（元レシピの分量）</h2>
+      <div class="card-body">
+        <div id="ingredientsContainer" class="ingredients-container">
+          <!-- JSでカードを生成 -->
+        </div>
+        <button type="button" class="btn-secondary full" id="addIngredientBtn">
+          ＋ 材料を追加
+        </button>
+      </div>
+    </section>
+
+    <!-- 計算ボタン -->
+    <section class="card">
+      <div class="card-body actions">
+        <button type="button" class="btn-primary full" id="calcBtn">
+          分量を計算する
+        </button>
+      </div>
+    </section>
+
+    <!-- 結果表示カード -->
+    <section class="card" id="resultCard" style="display:none;">
+      <h2 class="card-title">計算結果</h2>
+      <div class="card-body">
+        <div class="result-header">
+          <div class="result-title" id="resultRecipeTitle"></div>
+          <div class="result-servings" id="resultServings"></div>
+        </div>
+        <div class="result-table-wrapper">
+          <table class="result-table" id="resultTable">
+            <thead>
+              <tr>
+                <th>食材名</th>
+                <th>分量（自然な表現）</th>
+                <th>目安（ml換算）</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- JSで行を生成 -->
+            </tbody>
+          </table>
+        </div>
+        <button type="button" class="btn-outline full" id="copyBtn">
+          結果をコピー
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- コピー完了トースト -->
+  <div id="toast" class="toast">コピーしました</div>
 
   <script src="script.js"></script>
 </body>
